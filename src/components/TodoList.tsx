@@ -25,10 +25,11 @@ interface SortableTodoItemProps {
   onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId'>>) => void;
   onDelete: (id: string) => void;
   isSelected: boolean;
-  onToggleSelect: (id: string) => void;
+  onToggleSelect?: (id: string) => void;
+  showBulkSelect?: boolean;
 }
 
-function SortableTodoItem({ todo, projects, onUpdate, onDelete, isSelected, onToggleSelect }: SortableTodoItemProps) {
+function SortableTodoItem({ todo, projects, onUpdate, onDelete, isSelected, onToggleSelect, showBulkSelect }: SortableTodoItemProps) {
   const {
     attributes,
     listeners,
@@ -55,6 +56,7 @@ function SortableTodoItem({ todo, projects, onUpdate, onDelete, isSelected, onTo
         dragListeners={listeners}
         isSelected={isSelected}
         onToggleSelect={onToggleSelect}
+        showBulkSelect={showBulkSelect}
       />
     </div>
   );
@@ -70,9 +72,10 @@ interface TodoListProps {
   onSelectionChange?: (ids: string[]) => void;
   onBulkUpdate?: (updates: Partial<Todo>) => void;
   onBulkDelete?: () => void;
+  bulkSelectMode?: boolean;
 }
 
-export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selectedIds = [], onSelectionChange, onBulkUpdate, onBulkDelete }: TodoListProps) {
+export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selectedIds = [], onSelectionChange, onBulkUpdate, onBulkDelete, bulkSelectMode = false }: TodoListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -172,7 +175,8 @@ export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selec
                 onUpdate={onUpdate}
                 onDelete={onDelete}
                 isSelected={selectedIds.includes(todo.id)}
-                onToggleSelect={handleToggleSelect}
+                onToggleSelect={bulkSelectMode ? handleToggleSelect : undefined}
+                showBulkSelect={bulkSelectMode}
               />
             ))}
           </div>

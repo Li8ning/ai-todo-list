@@ -9,14 +9,15 @@ interface TodoInputProps {
   onAdd: (title: string, description?: string, priority?: TodoPriority, dueDate?: Date, projectId?: string) => void;
   projects: Project[];
   placeholder?: string;
+  defaultProjectId?: string;
 }
 
-export function TodoInput({ onAdd, projects, placeholder = "What needs to be done?" }: TodoInputProps) {
+export function TodoInput({ onAdd, projects, placeholder = "What needs to be done?", defaultProjectId }: TodoInputProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState<TodoPriority>('normal');
+  const [priority, setPriority] = useState<TodoPriority>('medium');
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
-  const [projectId, setProjectId] = useState<string>('inbox');
+  const [projectId, setProjectId] = useState<string>(defaultProjectId || 'inbox');
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -26,8 +27,8 @@ export function TodoInput({ onAdd, projects, placeholder = "What needs to be don
       setTitle('');
       setDescription('');
       setDueDate(undefined);
-      setPriority('normal');
-      setProjectId('inbox');
+      setPriority('medium');
+      setProjectId(defaultProjectId || 'inbox');
       setIsExpanded(false);
     }
   };
@@ -73,10 +74,7 @@ export function TodoInput({ onAdd, projects, placeholder = "What needs to be don
                       onChange={(e) => setPriority(e.target.value as TodoPriority)}
                       className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="critical">Critical</option>
-                      <option value="urgent">Urgent</option>
                       <option value="high">High</option>
-                      <option value="normal">Normal</option>
                       <option value="medium">Medium</option>
                       <option value="low">Low</option>
                     </select>
@@ -120,7 +118,7 @@ export function TodoInput({ onAdd, projects, placeholder = "What needs to be don
                     setDescription('');
                     setDueDate(undefined);
                     setPriority('medium');
-                    setProjectId('inbox');
+                    setProjectId(defaultProjectId || 'inbox');
                   }}
                 >
                   Cancel

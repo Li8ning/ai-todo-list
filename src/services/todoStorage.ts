@@ -1,4 +1,4 @@
-import type { Todo } from '../types/todo';
+import type { Todo, TodoPriority } from '../types/todo';
 
 const STORAGE_KEY = 'ai-todo-list-todos';
 
@@ -15,12 +15,25 @@ export class TodoStorage {
         projectId?: string;
       })[];
       // Convert date strings back to Date objects
-      return parsed.map((todo): Todo => ({
-        ...todo,
-        createdAt: new Date(todo.createdAt),
-        updatedAt: new Date(todo.updatedAt),
-        dueDate: todo.dueDate ? new Date(todo.dueDate) : undefined,
-      }));
+      return parsed.map((todo): Todo => {
+        // Migrate old priority values to new ones
+        let priority: TodoPriority = todo.priority as TodoPriority;
+        const oldPriority = todo.priority as string;
+        if (oldPriority === 'critical' || oldPriority === 'urgent') {
+          priority = 'high';
+        } else if (oldPriority === 'normal') {
+          priority = 'medium';
+        }
+        // 'high', 'medium', 'low' remain the same
+
+        return {
+          ...todo,
+          priority,
+          createdAt: new Date(todo.createdAt),
+          updatedAt: new Date(todo.updatedAt),
+          dueDate: todo.dueDate ? new Date(todo.dueDate) : undefined,
+        };
+      });
     } catch (error) {
       console.error('Error loading todos from localStorage:', error);
       return [];

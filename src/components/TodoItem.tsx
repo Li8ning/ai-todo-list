@@ -15,9 +15,10 @@ interface TodoItemProps {
   dragListeners?: unknown;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
+  showBulkSelect?: boolean;
 }
 
-export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = false, dragListeners, isSelected = false, onToggleSelect }: TodoItemProps) {
+export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = false, dragListeners, isSelected = false, onToggleSelect, showBulkSelect = false }: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
   const [editDescription, setEditDescription] = useState(todo.description || '');
@@ -47,8 +48,6 @@ export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = fals
     switch (status) {
       case 'completed':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
     }
@@ -72,7 +71,7 @@ export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = fals
         <div className="p-4">
           <div className="flex items-start gap-3">
             {/* Selection Checkbox */}
-            {onToggleSelect && (
+            {showBulkSelect && onToggleSelect && (
               <div className="flex-shrink-0 mt-1" data-no-dnd="true" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                 <input
                   type="checkbox"

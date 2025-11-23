@@ -1,6 +1,6 @@
-export type TodoStatus = 'pending' | 'in-progress' | 'completed';
+export type TodoStatus = 'pending' | 'completed';
 
-export type TodoPriority = 'critical' | 'urgent' | 'high' | 'normal' | 'medium' | 'low';
+export type TodoPriority = 'high' | 'medium' | 'low';
 
 export interface Project {
   id: string;

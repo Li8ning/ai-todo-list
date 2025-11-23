@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Project } from '../types/todo';
 import { ProjectStorage } from '../services/projectStorage';
 
-export function useProjects() {
+export function useProjects(onProjectDelete?: (projectId: string) => void) {
   const [projects, setProjects] = useState<Project[]>(() => {
     const stored = ProjectStorage.getProjects();
     return stored.length > 0 ? stored : ProjectStorage.getDefaultProjects();
@@ -39,8 +39,11 @@ export function useProjects() {
     // Don't allow deleting the inbox project
     if (id === 'inbox') return;
 
+    // Call the cascade delete callback if provided
+    onProjectDelete?.(id);
+
     setProjects(prev => prev.filter(project => project.id !== id));
-  }, []);
+  }, [onProjectDelete]);
 
   const getProjectById = useCallback((id?: string) => {
     if (!id) return undefined;

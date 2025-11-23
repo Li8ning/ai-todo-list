@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Fuse from 'fuse.js';
-import type { Todo, TodoPriority, TodoFilter, TodoStats } from '../types/todo';
+import type { Todo, TodoPriority, TodoFilter, TodoStats, TodoStatus } from '../types/todo';
 import { TodoStorage } from '../services/todoStorage';
 
 interface TodoAction {
@@ -10,7 +10,23 @@ interface TodoAction {
 }
 
 export function useTodos() {
-  const [todos, setTodos] = useState<Todo[]>(() => TodoStorage.getTodos());
+  const [todos, setTodos] = useState<Todo[]>(() => {
+    const storedTodos = TodoStorage.getTodos();
+    // Migrate any existing 'in-progress' todos to 'pending'
+    const migratedTodos = storedTodos.map(todo => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((todo as any).status === 'in-progress') {
+        return { ...todo, status: 'pending' as TodoStatus };
+      }
+      return todo;
+    });
+    // Save migrated todos back to storage if any were migrated
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (storedTodos.some(todo => (todo as any).status === 'in-progress')) {
+      TodoStorage.saveTodos(migratedTodos);
+    }
+    return migratedTodos;
+  });
   const [history, setHistory] = useState<TodoAction[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [filter, setFilter] = useState<TodoFilter>({ status: 'all', priority: 'all' });
@@ -28,7 +44,7 @@ export function useTodos() {
     setHistoryIndex(newHistory.length - 1);
   }, [history, historyIndex]);
 
-  const addTodo = useCallback((title: string, description?: string, priority: TodoPriority = 'normal', dueDate?: Date, projectId?: string) => {
+  const addTodo = useCallback((title: string, description?: string, priority: TodoPriority = 'medium', dueDate?: Date, projectId?: string) => {
     const newTodo: Todo = {
       id: TodoStorage.generateId(),
       title,
@@ -204,7 +220,7 @@ export function useTodos() {
     total: todos.length,
     completed: todos.filter(t => t.status === 'completed').length,
     pending: todos.filter(t => t.status === 'pending').length,
-    inProgress: todos.filter(t => t.status === 'in-progress').length,
+    inProgress: 0, // Removed, keeping for compatibility
     overdue: todos.filter(t => t.dueDate && t.dueDate < new Date() && t.status !== 'completed').length,
   };
 
