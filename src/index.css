@@ -1,0 +1,130 @@
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+@layer base {
+  body {
+    @apply bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-50 antialiased font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  /* Dark mode styles */
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* Focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-blue-500/20;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+}
+
+/* Design tokens */
+@layer components {
+  /* Typography */
+  .text-heading-1 {
+    @apply text-4xl font-bold tracking-tight lg:text-5xl;
+  }
+
+  .text-heading-2 {
+    @apply text-3xl font-semibold tracking-tight lg:text-4xl;
+  }
+
+  .text-heading-3 {
+    @apply text-2xl font-semibold tracking-tight lg:text-3xl;
+  }
+
+  .text-heading-4 {
+    @apply text-xl font-semibold tracking-tight lg:text-2xl;
+  }
+
+  .text-body-large {
+    @apply text-lg leading-7;
+  }
+
+  .text-body {
+    @apply text-base leading-6;
+  }
+
+  .text-body-small {
+    @apply text-sm leading-5;
+  }
+
+  .text-caption {
+    @apply text-xs leading-4 font-medium uppercase tracking-wide;
+  }
+
+  /* Layout */
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-spacing {
+    @apply py-12 sm:py-16 lg:py-20;
+  }
+
+  .card-spacing {
+    @apply p-6 sm:p-8;
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.6s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  /* Transitions */
+  .transition-smooth {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  .transition-colors-smooth {
+    @apply transition-colors duration-200 ease-in-out;
+  }
+
+  .transition-transform-smooth {
+    @apply transition-transform duration-200 ease-in-out;
+  }
+}
