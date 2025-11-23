@@ -37,15 +37,6 @@ export class ProjectStorage {
   }
 
   static getDefaultProjects(): Project[] {
-    return [
-      {
-        id: 'inbox',
-        name: 'Inbox',
-        description: 'Default project for uncategorized todos',
-        color: '#6b7280',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
+    return [];
   }
 }

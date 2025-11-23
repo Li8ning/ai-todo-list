@@ -36,9 +36,6 @@ export function useProjects(onProjectDelete?: (projectId: string) => void) {
   }, []);
 
   const deleteProject = useCallback((id: string) => {
-    // Don't allow deleting the inbox project
-    if (id === 'inbox') return;
-
     // Call the cascade delete callback if provided
     onProjectDelete?.(id);
 

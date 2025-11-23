@@ -249,7 +249,7 @@ export const ProjectPage = () => {
 
       {/* Add Todo */}
       <div className="mb-6">
-        <TodoInput onAdd={addTodo} projects={projects} defaultProjectId={projectId} />
+        <TodoInput onAdd={addTodo} projects={projects} defaultProjectId={projectId} hideProjectSelector={true} />
       </div>
 
       {/* Filters and Stats */}

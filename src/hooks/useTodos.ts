@@ -51,7 +51,7 @@ export function useTodos() {
       description,
       status: 'pending',
       priority,
-      projectId: projectId || 'inbox',
+      projectId: projectId || undefined,
       createdAt: new Date(),
       updatedAt: new Date(),
       dueDate,

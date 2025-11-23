@@ -8,7 +8,11 @@ import { useProjects } from '../hooks/useProjects';
 import { useSavedFilters } from '../hooks/useSavedFilters';
 import type { TodoFilter, Todo } from '../types/todo';
 
-export const Dashboard = () => {
+interface DashboardProps {
+  onNewProject?: () => void;
+}
+
+export const Dashboard: React.FC<DashboardProps> = ({ onNewProject }) => {
 
   const {
     todos,
@@ -58,6 +62,10 @@ export const Dashboard = () => {
     setSelectedTodoIds([]);
     setBulkSelectMode(false);
   };
+
+  const handleNewProject = () => {
+    onNewProject?.();
+  };
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-8">
@@ -94,75 +102,101 @@ export const Dashboard = () => {
         </span>
       </div>
 
-      {/* Add Todo */}
-      <div className="mb-6">
-        <TodoInput onAdd={addTodo} projects={projects} />
-      </div>
-
-      {/* Filters and Stats */}
-      <TodoFilters
-        filter={filter}
-        onFilterChange={setFilter}
-        savedFilters={savedFilters}
-        onSaveFilter={handleSaveFilter}
-        onLoadFilter={handleLoadFilter}
-        onDeleteFilter={handleDeleteFilter}
-        stats={stats}
-      />
-
-      {/* Todo List - Full Width */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>
-              {filter.status === 'all' ? 'All Todos' :
-               filter.status === 'pending' ? 'Pending Tasks' :
-               filter.status === 'completed' ? 'Completed Tasks' :
-               'Filtered Todos'}
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              {!bulkSelectMode && todos.length > 0 && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setBulkSelectMode(true)}
-                >
-                  Bulk Select
+      {/* Add Todo - Only show if projects exist */}
+      {projects.length > 0 ? (
+        <div className="mb-6">
+          <TodoInput onAdd={addTodo} projects={projects} />
+        </div>
+      ) : (
+        <div className="mb-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <div className="text-4xl mb-4">📝</div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  No Projects Yet
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Create your first project to start adding tasks.
+                </p>
+                <Button onClick={handleNewProject}>
+                  Create Your First Project
                 </Button>
-              )}
-              {bulkSelectMode && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setBulkSelectMode(false);
-                    setSelectedTodoIds([]);
-                  }}
-                >
-                  Cancel
-                </Button>
-              )}
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {todos.length} {todos.length === 1 ? 'task' : 'tasks'}
-              </span>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <TodoList
-            todos={todos}
-            projects={projects}
-            onUpdate={updateTodo}
-            onDelete={deleteTodo}
-            onReorder={reorderTodos}
-            selectedIds={selectedTodoIds}
-            onSelectionChange={setSelectedTodoIds}
-            onBulkUpdate={handleBulkUpdate}
-            onBulkDelete={handleBulkDelete}
-            bulkSelectMode={bulkSelectMode}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Only show filters and todo list if projects exist */}
+      {projects.length > 0 && (
+        <>
+          {/* Filters and Stats */}
+          <TodoFilters
+            filter={filter}
+            onFilterChange={setFilter}
+            savedFilters={savedFilters}
+            onSaveFilter={handleSaveFilter}
+            onLoadFilter={handleLoadFilter}
+            onDeleteFilter={handleDeleteFilter}
+            stats={stats}
           />
-        </CardContent>
-      </Card>
+
+          {/* Todo List - Full Width */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>
+                  {filter.status === 'all' ? 'All Todos' :
+                   filter.status === 'pending' ? 'Pending Tasks' :
+                   filter.status === 'completed' ? 'Completed Tasks' :
+                   'Filtered Todos'}
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  {!bulkSelectMode && todos.length > 0 && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setBulkSelectMode(true)}
+                    >
+                      Bulk Select
+                    </Button>
+                  )}
+                  {bulkSelectMode && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setBulkSelectMode(false);
+                        setSelectedTodoIds([]);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {todos.length} {todos.length === 1 ? 'task' : 'tasks'}
+                  </span>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <TodoList
+                todos={todos}
+                projects={projects}
+                onUpdate={updateTodo}
+                onDelete={deleteTodo}
+                onReorder={reorderTodos}
+                selectedIds={selectedTodoIds}
+                onSelectionChange={setSelectedTodoIds}
+                onBulkUpdate={handleBulkUpdate}
+                onBulkDelete={handleBulkDelete}
+                bulkSelectMode={bulkSelectMode}
+              />
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 };

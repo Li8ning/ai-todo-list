@@ -7,13 +7,15 @@ interface SidebarProps {
   projects: Project[];
   onNewProject?: () => void;
   onProjectClick?: (projectId: string) => void;
+  activeItem?: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   className = '',
   projects,
   onNewProject,
-  onProjectClick
+  onProjectClick,
+  activeItem
 }) => {
   return (
     <div className={cn('w-64 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col', className)}>
@@ -33,7 +35,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => onProjectClick?.('dashboard')}
               className={cn(
                 'w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200',
-                'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                activeItem === 'dashboard'
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
               )}
             >
               <span className="mr-3 text-lg">🏠</span>
@@ -47,13 +51,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => onProjectClick?.('inbox')}
               className={cn(
                 'w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200',
-                'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                activeItem === 'inbox'
+                  ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
               )}
             >
               <span className="mr-3 text-lg">📥</span>
               Inbox
             </button>
           </li>
+
 
           {/* Projects Section */}
           <li className="pt-4">
@@ -67,7 +74,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => onProjectClick?.(project.id)}
                 className={cn(
                   'w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors duration-200',
-                  'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                  activeItem === project.id
+                    ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
+                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                 )}
               >
                 <span className="mr-3 text-lg">📁</span>

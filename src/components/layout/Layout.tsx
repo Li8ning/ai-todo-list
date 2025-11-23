@@ -10,6 +10,7 @@ interface LayoutProps {
   projects: Project[];
   onNewProject?: () => void;
   onProjectClick?: (projectId: string) => void;
+  activeItem?: string;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -17,7 +18,8 @@ export const Layout: React.FC<LayoutProps> = ({
   className = '',
   projects,
   onNewProject,
-  onProjectClick
+  onProjectClick,
+  activeItem
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -45,6 +47,7 @@ export const Layout: React.FC<LayoutProps> = ({
             projects={projects}
             onNewProject={onNewProject}
             onProjectClick={onProjectClick}
+            activeItem={activeItem}
           />
         </div>
 
