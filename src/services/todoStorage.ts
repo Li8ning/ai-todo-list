@@ -12,6 +12,7 @@ export class TodoStorage {
         createdAt: string;
         updatedAt: string;
         dueDate?: string;
+        projectId?: string;
       })[];
       // Convert date strings back to Date objects
       return parsed.map((todo): Todo => ({

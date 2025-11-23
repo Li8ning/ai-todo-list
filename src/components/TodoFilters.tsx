@@ -1,10 +1,16 @@
+import { useState } from 'react';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
-import type { TodoFilter, TodoStatus, TodoPriority } from '../types/todo';
+import { Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter } from './ui/Modal';
+import type { TodoFilter, TodoStatus, TodoPriority, SavedFilter } from '../types/todo';
 
 interface TodoFiltersProps {
   filter: TodoFilter;
   onFilterChange: (filter: TodoFilter) => void;
+  savedFilters: SavedFilter[];
+  onSaveFilter: (name: string) => void;
+  onLoadFilter: (filter: TodoFilter) => void;
+  onDeleteFilter: (id: string) => void;
   stats: {
     total: number;
     completed: number;
@@ -14,7 +20,9 @@ interface TodoFiltersProps {
   };
 }
 
-export function TodoFilters({ filter, onFilterChange, stats }: TodoFiltersProps) {
+export function TodoFilters({ filter, onFilterChange, savedFilters, onSaveFilter, onLoadFilter, onDeleteFilter, stats }: TodoFiltersProps) {
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [filterName, setFilterName] = useState('');
   const statusFilters: { value: TodoStatus | 'all'; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'pending', label: 'Pending' },
@@ -24,9 +32,21 @@ export function TodoFilters({ filter, onFilterChange, stats }: TodoFiltersProps)
 
   const priorityFilters: { value: TodoPriority | 'all'; label: string }[] = [
     { value: 'all', label: 'All Priorities' },
+    { value: 'critical', label: 'Critical' },
+    { value: 'urgent', label: 'Urgent' },
     { value: 'high', label: 'High' },
+    { value: 'normal', label: 'Normal' },
     { value: 'medium', label: 'Medium' },
     { value: 'low', label: 'Low' },
+  ];
+
+  const dueDateFilters: { value: string; label: string }[] = [
+    { value: 'all', label: 'All Dates' },
+    { value: 'today', label: 'Today' },
+    { value: 'tomorrow', label: 'Tomorrow' },
+    { value: 'this-week', label: 'This Week' },
+    { value: 'next-week', label: 'Next Week' },
+    { value: 'overdue', label: 'Overdue' },
   ];
 
   const handleStatusFilter = (status: TodoStatus | 'all') => {
@@ -41,11 +61,18 @@ export function TodoFilters({ filter, onFilterChange, stats }: TodoFiltersProps)
     onFilterChange({ ...filter, search: search || undefined });
   };
 
-  const clearFilters = () => {
-    onFilterChange({ status: 'all', priority: 'all' });
+  const handleDueDateFilter = (dueDateRange: string) => {
+    onFilterChange({
+      ...filter,
+      dueDateRange: dueDateRange as 'today' | 'tomorrow' | 'this-week' | 'next-week' | 'overdue' | 'custom' | 'all'
+    });
   };
 
-  const hasActiveFilters = filter.status !== 'all' || filter.priority !== 'all' || !!filter.search;
+  const clearFilters = () => {
+    onFilterChange({ status: 'all', priority: 'all', projectId: 'all', dueDateRange: 'all' });
+  };
+
+  const hasActiveFilters = filter.status !== 'all' || filter.priority !== 'all' || filter.projectId !== 'all' || filter.dueDateRange !== 'all' || !!filter.search;
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
@@ -90,14 +117,103 @@ export function TodoFilters({ filter, onFilterChange, stats }: TodoFiltersProps)
             ))}
           </select>
 
+          {/* Due Date Filter */}
+          <select
+            value={filter.dueDateRange || 'all'}
+            onChange={(e) => handleDueDateFilter(e.target.value)}
+            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {dueDateFilters.map(({ value, label }) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+
           {/* Clear Filters */}
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
               Clear
             </Button>
           )}
+
+          {/* Save Filter */}
+          {hasActiveFilters && (
+            <Button variant="secondary" size="sm" onClick={() => setShowSaveModal(true)}>
+              Save Filter
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Saved Filters */}
+      {savedFilters.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Saved Filters:</span>
+            {savedFilters.map((savedFilter) => (
+              <div key={savedFilter.id} className="flex items-center gap-1">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => onLoadFilter(savedFilter.filter)}
+                  className="text-xs"
+                >
+                  {savedFilter.name}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDeleteFilter(savedFilter.id)}
+                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                  title="Delete filter"
+                >
+                  ×
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Save Filter Modal */}
+      <Modal isOpen={showSaveModal} onClose={() => setShowSaveModal(false)}>
+        <ModalHeader>
+          <ModalTitle>Save Filter</ModalTitle>
+        </ModalHeader>
+        <ModalContent>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Filter Name
+              </label>
+              <Input
+                value={filterName}
+                onChange={(e) => setFilterName(e.target.value)}
+                placeholder="Enter a name for this filter"
+                autoFocus
+              />
+            </div>
+          </div>
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="ghost" onClick={() => setShowSaveModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              if (filterName.trim()) {
+                onSaveFilter(filterName.trim());
+                setFilterName('');
+                setShowSaveModal(false);
+              }
+            }}
+            disabled={!filterName.trim()}
+          >
+            Save Filter
+          </Button>
+        </ModalFooter>
+      </Modal>
 
       {/* Stats */}
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">

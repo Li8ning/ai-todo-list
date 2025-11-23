@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import Fuse from 'fuse.js';
 import type { Todo, TodoPriority, TodoFilter, TodoStats } from '../types/todo';
 import { TodoStorage } from '../services/todoStorage';
 
@@ -27,13 +28,14 @@ export function useTodos() {
     setHistoryIndex(newHistory.length - 1);
   }, [history, historyIndex]);
 
-  const addTodo = useCallback((title: string, description?: string, priority: TodoPriority = 'medium', dueDate?: Date) => {
+  const addTodo = useCallback((title: string, description?: string, priority: TodoPriority = 'normal', dueDate?: Date, projectId?: string) => {
     const newTodo: Todo = {
       id: TodoStorage.generateId(),
       title,
       description,
       status: 'pending',
       priority,
+      projectId: projectId || 'inbox',
       createdAt: new Date(),
       updatedAt: new Date(),
       dueDate,
@@ -50,7 +52,7 @@ export function useTodos() {
     });
   }, [todos, addAction]);
 
-  const updateTodo = useCallback((id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate'>>) => {
+  const updateTodo = useCallback((id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId'>>) => {
     const previousState = [...todos];
     setTodos(prev => prev.map(todo =>
       todo.id === id
@@ -117,15 +119,85 @@ export function useTodos() {
   const canUndo = historyIndex >= 0;
   const canRedo = historyIndex < history.length - 1;
 
+  // Helper function to check if date is in range
+  const isDateInRange = (date: Date, range: string): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const endOfWeek = new Date(today);
+    endOfWeek.setDate(endOfWeek.getDate() + (6 - today.getDay()));
+
+    const startOfNextWeek = new Date(endOfWeek);
+    startOfNextWeek.setDate(startOfNextWeek.getDate() + 1);
+
+    const endOfNextWeek = new Date(startOfNextWeek);
+    endOfNextWeek.setDate(endOfNextWeek.getDate() + 6);
+
+    switch (range) {
+      case 'today':
+        return date >= today && date < tomorrow;
+      case 'tomorrow': {
+        const dayAfterTomorrow = new Date(tomorrow);
+        dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
+        return date >= tomorrow && date < dayAfterTomorrow;
+      }
+      case 'this-week':
+        return date >= today && date <= endOfWeek;
+      case 'next-week':
+        return date >= startOfNextWeek && date <= endOfNextWeek;
+      default:
+        return true;
+    }
+  };
+
+  // Create fuzzy search instance
+  const fuse = useMemo(() => {
+    return new Fuse(todos, {
+      keys: ['title', 'description'],
+      threshold: 0.3, // Lower threshold = more strict matching
+      includeScore: true,
+    });
+  }, [todos]);
+
   // Filter and sort todos
-  const filteredTodos = todos
-    .filter(todo => {
+  const filteredTodos = useMemo(() => {
+    let filtered = todos;
+
+    // Apply search filter first
+    if (filter.search && filter.search.trim()) {
+      const searchResults = fuse.search(filter.search.trim());
+      const searchIds = new Set(searchResults.map(result => result.item.id));
+      filtered = filtered.filter(todo => searchIds.has(todo.id));
+    }
+
+    // Apply other filters
+    filtered = filtered.filter(todo => {
       if (filter.status && filter.status !== 'all' && todo.status !== filter.status) return false;
       if (filter.priority && filter.priority !== 'all' && todo.priority !== filter.priority) return false;
-      if (filter.search && !todo.title.toLowerCase().includes(filter.search.toLowerCase())) return false;
+      if (filter.projectId && filter.projectId !== 'all' && todo.projectId !== filter.projectId) return false;
+      if (filter.dueDateRange && filter.dueDateRange !== 'all') {
+        if (filter.dueDateRange === 'overdue') {
+          if (!todo.dueDate || todo.dueDate >= new Date() || todo.status === 'completed') return false;
+        } else if (todo.dueDate) {
+          if (filter.dueDateRange === 'custom') {
+            // For custom range, we'll handle this differently later
+            return true;
+          }
+          return isDateInRange(todo.dueDate, filter.dueDateRange);
+        } else {
+          // If no due date but filtering by date range, exclude
+          return false;
+        }
+      }
       return true;
-    })
-    .sort((a, b) => a.order - b.order);
+    });
+
+    // Sort by order
+    return filtered.sort((a, b) => a.order - b.order);
+  }, [todos, filter, fuse]);
 
   // Calculate stats
   const stats: TodoStats = {

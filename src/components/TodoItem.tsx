@@ -2,17 +2,22 @@ import { useState } from 'react';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { Modal } from './ui/Modal';
-import type { Todo, TodoStatus, TodoPriority } from '../types/todo';
+import { ProjectBadge } from './ProjectSelector';
+import { PriorityBadge } from './PriorityBadge';
+import type { Todo, TodoStatus, Project } from '../types/todo';
 
 interface TodoItemProps {
   todo: Todo;
-  onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate'>>) => void;
+  projects: Project[];
+  onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId'>>) => void;
   onDelete: (id: string) => void;
   isDragging?: boolean;
   dragListeners?: unknown;
+  isSelected?: boolean;
+  onToggleSelect?: (id: string) => void;
 }
 
-export function TodoItem({ todo, onUpdate, onDelete, isDragging = false, dragListeners }: TodoItemProps) {
+export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = false, dragListeners, isSelected = false, onToggleSelect }: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
   const [editDescription, setEditDescription] = useState(todo.description || '');
@@ -49,18 +54,9 @@ export function TodoItem({ todo, onUpdate, onDelete, isDragging = false, dragLis
     }
   };
 
-  const getPriorityColor = (priority: TodoPriority) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      default:
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-    }
-  };
 
   const isOverdue = todo.dueDate && todo.dueDate < new Date() && todo.status !== 'completed';
+  const project = projects.find(p => p.id === todo.projectId);
 
   return (
     <>
@@ -75,6 +71,17 @@ export function TodoItem({ todo, onUpdate, onDelete, isDragging = false, dragLis
       >
         <div className="p-4">
           <div className="flex items-start gap-3">
+            {/* Selection Checkbox */}
+            {onToggleSelect && (
+              <div className="flex-shrink-0 mt-1" data-no-dnd="true" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => onToggleSelect(todo.id)}
+                  className="h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+              </div>
+            )}
             {/* Drag Handle */}
             <div className="flex-shrink-0 mt-1 cursor-grab" {...(dragListeners || {})}>
               ⋮⋮
@@ -140,9 +147,8 @@ export function TodoItem({ todo, onUpdate, onDelete, isDragging = false, dragLis
                     <Badge variant="secondary" className={getStatusColor(todo.status)}>
                       {todo.status.replace('-', ' ')}
                     </Badge>
-                    <Badge variant="priority" className={getPriorityColor(todo.priority)}>
-                      {todo.priority}
-                    </Badge>
+                    <PriorityBadge priority={todo.priority} />
+                    {project && <ProjectBadge project={project} />}
                     {todo.dueDate && (
                       <Badge variant={isOverdue ? 'error' : 'secondary'}>
                         Due {todo.dueDate.toLocaleDateString()}

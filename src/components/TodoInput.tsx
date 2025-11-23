@@ -1,29 +1,33 @@
 import { useState } from 'react';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
-import type { TodoPriority } from '../types/todo';
+import { ProjectSelector } from './ProjectSelector';
+import { DatePicker } from './DatePicker';
+import type { TodoPriority, Project } from '../types/todo';
 
 interface TodoInputProps {
-  onAdd: (title: string, description?: string, priority?: TodoPriority, dueDate?: Date) => void;
+  onAdd: (title: string, description?: string, priority?: TodoPriority, dueDate?: Date, projectId?: string) => void;
+  projects: Project[];
   placeholder?: string;
 }
 
-export function TodoInput({ onAdd, placeholder = "What needs to be done?" }: TodoInputProps) {
+export function TodoInput({ onAdd, projects, placeholder = "What needs to be done?" }: TodoInputProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState<TodoPriority>('medium');
-  const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState<TodoPriority>('normal');
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
+  const [projectId, setProjectId] = useState<string>('inbox');
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim()) {
-      const parsedDueDate = dueDate ? new Date(dueDate) : undefined;
-      onAdd(title.trim(), description.trim() || undefined, priority, parsedDueDate);
+      onAdd(title.trim(), description.trim() || undefined, priority, dueDate, projectId);
       setTitle('');
       setDescription('');
-      setDueDate('');
-      setPriority('medium');
+      setDueDate(undefined);
+      setPriority('normal');
+      setProjectId('inbox');
       setIsExpanded(false);
     }
   };
@@ -58,31 +62,47 @@ export function TodoInput({ onAdd, placeholder = "What needs to be done?" }: Tod
                 rows={2}
               />
 
-              <div className="flex flex-wrap gap-3 items-center">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Priority:
-                  </label>
-                  <select
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value as TodoPriority)}
-                    className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-3 items-center">
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Priority:
+                    </label>
+                    <select
+                      value={priority}
+                      onChange={(e) => setPriority(e.target.value as TodoPriority)}
+                      className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="critical">Critical</option>
+                      <option value="urgent">Urgent</option>
+                      <option value="high">High</option>
+                      <option value="normal">Normal</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Due Date:
+                    </label>
+                    <DatePicker
+                      selected={dueDate}
+                      onSelect={setDueDate}
+                      placeholder="Pick a date"
+                    />
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Due Date:
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-2">
+                    Project:
                   </label>
-                  <input
-                    type="date"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <ProjectSelector
+                    projects={projects}
+                    selectedProjectId={projectId}
+                    onProjectChange={setProjectId}
+                    className="flex-wrap"
                   />
                 </div>
               </div>
@@ -98,8 +118,9 @@ export function TodoInput({ onAdd, placeholder = "What needs to be done?" }: Tod
                     setIsExpanded(false);
                     setTitle('');
                     setDescription('');
-                    setDueDate('');
+                    setDueDate(undefined);
                     setPriority('medium');
+                    setProjectId('inbox');
                   }}
                 >
                   Cancel

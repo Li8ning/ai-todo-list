@@ -1,14 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Layout } from './components/layout';
 import { Button, Card, CardHeader, CardTitle, CardContent } from './components/ui';
 import { TodoInput } from './components/TodoInput';
 import { TodoList } from './components/TodoList';
 import { TodoFilters } from './components/TodoFilters';
+import { ProjectSidebar } from './components/ProjectSidebar';
+import { ProjectModal } from './components/ProjectModal';
 import { useTodos } from './hooks/useTodos';
+import { useProjects } from './hooks/useProjects';
+import { useSavedFilters } from './hooks/useSavedFilters';
+import type { Project, TodoFilter, Todo } from './types/todo';
 
 function App() {
   const {
     todos,
+    allTodos,
     stats,
     filter,
     setFilter,
@@ -21,6 +27,72 @@ function App() {
     canUndo,
     canRedo,
   } = useTodos();
+
+  const { projects, addProject, updateProject, getProjectById } = useProjects();
+  const { savedFilters, saveFilter, deleteFilter } = useSavedFilters();
+
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [selectedTodoIds, setSelectedTodoIds] = useState<string[]>([]);
+
+  // Calculate project stats
+  const projectStats = useMemo(() => {
+    const stats: Record<string, { todoCount: number; completedCount: number }> = {};
+
+    projects.forEach(project => {
+      const projectTodos = allTodos.filter(todo => todo.projectId === project.id);
+      stats[project.id] = {
+        todoCount: projectTodos.length,
+        completedCount: projectTodos.filter(todo => todo.status === 'completed').length,
+      };
+    });
+
+    return stats;
+  }, [projects, allTodos]);
+
+  const handleCreateProject = () => {
+    setEditingProject(null);
+    setShowProjectModal(true);
+  };
+
+
+  const handleSaveProject = (projectData: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (editingProject) {
+      updateProject(editingProject.id, projectData);
+    } else {
+      addProject(projectData.name, projectData.description, projectData.color);
+    }
+  };
+
+  const handleProjectSelect = (projectId: string) => {
+    setFilter({ ...filter, projectId });
+  };
+
+  const handleSaveFilter = (name: string) => {
+    saveFilter(name, filter);
+  };
+
+  const handleLoadFilter = (loadedFilter: TodoFilter) => {
+    setFilter(loadedFilter);
+  };
+
+  const handleDeleteFilter = (id: string) => {
+    deleteFilter(id);
+  };
+
+  const handleBulkUpdate = (updates: Partial<Todo>) => {
+    selectedTodoIds.forEach(id => {
+      updateTodo(id, updates);
+    });
+    setSelectedTodoIds([]);
+  };
+
+  const handleBulkDelete = () => {
+    selectedTodoIds.forEach(id => {
+      deleteTodo(id);
+    });
+    setSelectedTodoIds([]);
+  };
 
   // Keyboard shortcuts for undo/redo
   useEffect(() => {
@@ -79,25 +151,35 @@ function App() {
 
         {/* Add Todo */}
         <div className="mb-6">
-          <TodoInput onAdd={addTodo} />
+          <TodoInput onAdd={addTodo} projects={projects} />
         </div>
 
         {/* Filters and Stats */}
-        <TodoFilters filter={filter} onFilterChange={setFilter} stats={stats} />
+        <TodoFilters
+          filter={filter}
+          onFilterChange={setFilter}
+          savedFilters={savedFilters}
+          onSaveFilter={handleSaveFilter}
+          onLoadFilter={handleLoadFilter}
+          onDeleteFilter={handleDeleteFilter}
+          stats={stats}
+        />
 
         {/* Todo List */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Todo List */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>
-                    {filter.status === 'all' ? 'All Todos' :
-                     filter.status === 'pending' ? 'Pending Tasks' :
-                     filter.status === 'in-progress' ? 'In Progress' :
-                     filter.status === 'completed' ? 'Completed Tasks' :
-                     'Filtered Todos'}
+                    {filter.projectId && filter.projectId !== 'all'
+                      ? `${getProjectById(filter.projectId)?.name || 'Project'} Todos`
+                      : filter.status === 'all' ? 'All Todos' :
+                        filter.status === 'pending' ? 'Pending Tasks' :
+                        filter.status === 'in-progress' ? 'In Progress' :
+                        filter.status === 'completed' ? 'Completed Tasks' :
+                        'Filtered Todos'}
                   </CardTitle>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
                     {todos.length} {todos.length === 1 ? 'task' : 'tasks'}
@@ -107,16 +189,29 @@ function App() {
               <CardContent>
                 <TodoList
                   todos={todos}
+                  projects={projects}
                   onUpdate={updateTodo}
                   onDelete={deleteTodo}
                   onReorder={reorderTodos}
+                  selectedIds={selectedTodoIds}
+                  onSelectionChange={setSelectedTodoIds}
+                  onBulkUpdate={handleBulkUpdate}
+                  onBulkDelete={handleBulkDelete}
                 />
               </CardContent>
             </Card>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Projects Sidebar */}
+            <ProjectSidebar
+              projects={projects}
+              selectedProjectId={filter.projectId}
+              onProjectSelect={handleProjectSelect}
+              onCreateProject={handleCreateProject}
+              projectStats={projectStats}
+            />
             {/* Today's Summary */}
             <Card>
               <CardHeader>
@@ -184,6 +279,15 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Project Modal */}
+      <ProjectModal
+        isOpen={showProjectModal}
+        onClose={() => setShowProjectModal(false)}
+        onSave={handleSaveProject}
+        project={editingProject || undefined}
+        title={editingProject ? 'Edit Project' : 'Create New Project'}
+      />
     </Layout>
   );
 }
