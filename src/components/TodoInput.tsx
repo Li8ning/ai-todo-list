@@ -26,7 +26,8 @@ export function TodoInput({ onAdd, projects, placeholder = "What needs to be don
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim()) {
-      onAdd(title.trim(), description.trim() || undefined, priority, dueDate, projectId);
+      const finalProjectId = hideProjectSelector ? defaultProjectId : projectId;
+      onAdd(title.trim(), description.trim() || undefined, priority, dueDate, finalProjectId);
       setTitle('');
       setDescription('');
       setDueDate(undefined);
@@ -116,7 +117,11 @@ export function TodoInput({ onAdd, projects, placeholder = "What needs to be don
                           setTimeout(() => setShowProjectDropdown(false), 200);
                         }}
                         placeholder="Search and select project..."
-                        className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={`w-full px-3 py-2 text-sm border rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          !hideProjectSelector && !projectId && title.trim()
+                            ? 'border-red-500 dark:border-red-400'
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
                       />
                       {projectId && (
                         <button
@@ -171,7 +176,7 @@ export function TodoInput({ onAdd, projects, placeholder = "What needs to be don
               </div>
 
               <div className="flex gap-2">
-                <Button type="submit" disabled={!title.trim()}>
+                <Button type="submit" disabled={!title.trim() || (!hideProjectSelector && !projectId)}>
                   Add Task
                 </Button>
                 <Button
