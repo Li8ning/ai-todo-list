@@ -15,7 +15,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
   ];
 
   return (
-    <div className={cn('w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col', className)}>
+    <div className={cn('w-64 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col', className)}>
       {/* Logo/Brand */}
       <div className="p-6 border-b border-gray-200 dark:border-gray-800">
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
