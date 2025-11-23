@@ -1,119 +1,116 @@
+import { useEffect } from 'react';
 import { Layout } from './components/layout';
-import { Button, Card, CardHeader, CardTitle, CardContent, Badge, Input } from './components/ui';
+import { Button, Card, CardHeader, CardTitle, CardContent } from './components/ui';
+import { TodoInput } from './components/TodoInput';
+import { TodoList } from './components/TodoList';
+import { TodoFilters } from './components/TodoFilters';
+import { useTodos } from './hooks/useTodos';
 
 function App() {
+  const {
+    todos,
+    stats,
+    filter,
+    setFilter,
+    addTodo,
+    updateTodo,
+    deleteTodo,
+    reorderTodos,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useTodos();
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'z' && !e.shiftKey && canUndo) {
+          e.preventDefault();
+          undo();
+        } else if ((e.key === 'y' || (e.key === 'z' && e.shiftKey)) && canRedo) {
+          e.preventDefault();
+          redo();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [undo, redo, canUndo, canRedo]);
+
   return (
     <Layout>
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Welcome to your Todo Dashboard
+            Todo Dashboard
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
             Manage your tasks efficiently with our modern, intuitive interface.
           </p>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card hover className="cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <span className="mr-2 text-2xl">📝</span>
-                Add New Task
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Create a new todo item with priority and due date.
-              </p>
-              <Button size="sm">Create Task</Button>
-            </CardContent>
-          </Card>
-
-          <Card hover className="cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <span className="mr-2 text-2xl">📊</span>
-                View Analytics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                See your productivity trends and insights.
-              </p>
-              <Button variant="secondary" size="sm">View Stats</Button>
-            </CardContent>
-          </Card>
-
-          <Card hover className="cursor-pointer">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <span className="mr-2 text-2xl">⚙️</span>
-                Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Customize your experience and preferences.
-              </p>
-              <Button variant="ghost" size="sm">Open Settings</Button>
-            </CardContent>
-          </Card>
+        {/* Undo/Redo Controls */}
+        <div className="flex gap-2 mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={undo}
+            disabled={!canUndo}
+            leftIcon="↶"
+          >
+            Undo
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={redo}
+            disabled={!canRedo}
+            leftIcon="↷"
+          >
+            Redo
+          </Button>
+          <span className="text-sm text-gray-500 dark:text-gray-400 self-center ml-4">
+            Ctrl+Z / Ctrl+Y
+          </span>
         </div>
 
-        {/* Todo List Section */}
+        {/* Add Todo */}
+        <div className="mb-6">
+          <TodoInput onAdd={addTodo} />
+        </div>
+
+        {/* Filters and Stats */}
+        <TodoFilters filter={filter} onFilterChange={setFilter} stats={stats} />
+
+        {/* Todo List */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Todo List */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>All Todos</CardTitle>
-                  <Badge variant="secondary">12 tasks</Badge>
+                  <CardTitle>
+                    {filter.status === 'all' ? 'All Todos' :
+                     filter.status === 'pending' ? 'Pending Tasks' :
+                     filter.status === 'in-progress' ? 'In Progress' :
+                     filter.status === 'completed' ? 'Completed Tasks' :
+                     'Filtered Todos'}
+                  </CardTitle>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {todos.length} {todos.length === 1 ? 'task' : 'tasks'}
+                  </span>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {/* Sample Todo Items */}
-                  {[
-                    { id: 1, title: 'Review project proposal', priority: 'high', completed: false },
-                    { id: 2, title: 'Update documentation', priority: 'medium', completed: false },
-                    { id: 3, title: 'Team meeting preparation', priority: 'low', completed: true },
-                    { id: 4, title: 'Code review for feature branch', priority: 'high', completed: false },
-                  ].map((todo) => (
-                    <div
-                      key={todo.id}
-                      className={`flex items-center p-3 rounded-lg border transition-colors ${
-                        todo.completed
-                          ? 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
-                          : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={todo.completed}
-                        className="mr-3 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
-                        readOnly
-                      />
-                      <span className={`flex-1 ${todo.completed ? 'line-through text-gray-500' : ''}`}>
-                        {todo.title}
-                      </span>
-                      <Badge
-                        variant="priority"
-                        className={`ml-3 ${
-                          todo.priority === 'high'
-                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                            : todo.priority === 'medium'
-                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                            : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        }`}
-                      >
-                        {todo.priority}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
+                <TodoList
+                  todos={todos}
+                  onUpdate={updateTodo}
+                  onDelete={deleteTodo}
+                  onReorder={reorderTodos}
+                />
               </CardContent>
             </Card>
           </div>
@@ -123,35 +120,64 @@ function App() {
             {/* Today's Summary */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Today's Summary</CardTitle>
+                <CardTitle className="text-lg">Summary</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Total</span>
+                    <span className="font-semibold">{stats.total}</span>
+                  </div>
+                  <div className="flex justify-between">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Completed</span>
-                    <span className="font-semibold text-green-600">3/12</span>
+                    <span className="font-semibold text-green-600">{stats.completed}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">In Progress</span>
+                    <span className="font-semibold text-blue-600">{stats.inProgress}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-600 dark:text-gray-400">Pending</span>
-                    <span className="font-semibold text-orange-600">9</span>
+                    <span className="font-semibold text-orange-600">{stats.pending}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">Overdue</span>
-                    <span className="font-semibold text-red-600">2</span>
-                  </div>
+                  {stats.overdue > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Overdue</span>
+                      <span className="font-semibold text-red-600">{stats.overdue}</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Add */}
+            {/* Quick Actions */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Quick Add</CardTitle>
+                <CardTitle className="text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Input placeholder="What needs to be done?" />
-                  <Button className="w-full">Add Task</Button>
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => setFilter({ ...filter, status: 'completed' })}
+                  >
+                    View Completed
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => setFilter({ ...filter, status: 'pending' })}
+                  >
+                    View Pending
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setFilter({ status: 'all', priority: 'all' })}
+                  >
+                    Clear Filters
+                  </Button>
                 </div>
               </CardContent>
             </Card>
