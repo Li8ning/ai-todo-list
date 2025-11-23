@@ -105,10 +105,14 @@ export function useTodos() {
 
   const redo = useCallback(() => {
     if (historyIndex < history.length - 1) {
-      setHistoryIndex(historyIndex + 1);
-      // TODO: Implement proper redo by replaying actions
+      const nextIndex = historyIndex + 1;
+      const action = history[nextIndex];
+      if (action && action.previousState) {
+        setTodos(action.previousState);
+        setHistoryIndex(nextIndex);
+      }
     }
-  }, [historyIndex, history.length]);
+  }, [history, historyIndex]);
 
   const canUndo = historyIndex >= 0;
   const canRedo = historyIndex < history.length - 1;

@@ -150,12 +150,13 @@ export function TodoItem({ todo, onUpdate, onDelete, isDragging = false }: TodoI
 
             {/* Actions */}
             {!isEditing && (
-              <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+              <div className="flex-shrink-0 flex gap-1">
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => setIsEditing(true)}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 opacity-60 hover:opacity-100"
+                  title="Edit task"
                 >
                   ✏️
                 </Button>
@@ -163,7 +164,8 @@ export function TodoItem({ todo, onUpdate, onDelete, isDragging = false }: TodoI
                   size="sm"
                   variant="ghost"
                   onClick={() => setShowDeleteModal(true)}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                  className="h-8 w-8 p-0 opacity-60 hover:opacity-100 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                  title="Delete task"
                 >
                   🗑️
                 </Button>
