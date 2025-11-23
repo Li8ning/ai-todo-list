@@ -41,12 +41,14 @@ function SortableTodoItem({ todo, onUpdate, onDelete }: SortableTodoItemProps) {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes}>
       <TodoItem
+        key={todo.id}
         todo={todo}
         onUpdate={onUpdate}
         onDelete={onDelete}
         isDragging={isDragging}
+        dragListeners={listeners}
       />
     </div>
   );

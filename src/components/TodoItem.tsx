@@ -9,9 +9,10 @@ interface TodoItemProps {
   onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate'>>) => void;
   onDelete: (id: string) => void;
   isDragging?: boolean;
+  dragListeners?: unknown;
 }
 
-export function TodoItem({ todo, onUpdate, onDelete, isDragging = false }: TodoItemProps) {
+export function TodoItem({ todo, onUpdate, onDelete, isDragging = false, dragListeners }: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
   const [editDescription, setEditDescription] = useState(todo.description || '');
@@ -74,8 +75,12 @@ export function TodoItem({ todo, onUpdate, onDelete, isDragging = false }: TodoI
       >
         <div className="p-4">
           <div className="flex items-start gap-3">
+            {/* Drag Handle */}
+            <div className="flex-shrink-0 mt-1 cursor-grab" {...(dragListeners || {})}>
+              ⋮⋮
+            </div>
             {/* Status Checkbox */}
-            <div className="flex-shrink-0 mt-1">
+            <div className="flex-shrink-0 mt-1" data-no-dnd="true" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
               <input
                 type="checkbox"
                 checked={todo.status === 'completed'}
@@ -87,7 +92,7 @@ export function TodoItem({ todo, onUpdate, onDelete, isDragging = false }: TodoI
             {/* Content */}
             <div className="flex-1 min-w-0">
               {isEditing ? (
-                <div className="space-y-2">
+                <div className="space-y-2" data-no-dnd="true" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                   <input
                     type="text"
                     value={editTitle}
@@ -150,7 +155,7 @@ export function TodoItem({ todo, onUpdate, onDelete, isDragging = false }: TodoI
 
             {/* Actions */}
             {!isEditing && (
-              <div className="flex-shrink-0 flex gap-1">
+              <div className="flex-shrink-0 flex gap-1" data-no-dnd="true" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
                 <Button
                   size="sm"
                   variant="ghost"

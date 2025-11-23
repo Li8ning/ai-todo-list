@@ -27,7 +27,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, className = '' }) => {
         {/* Sidebar */}
         <div
           className={cn(
-            'fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
+            'fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:fixed lg:left-0 lg:top-0 lg:h-screen',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           )}
         >
@@ -36,8 +36,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, className = '' }) => {
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0">
-          <Header onMenuClick={() => setSidebarOpen(true)} />
-          <main className={cn('flex-1 p-4 sm:p-6', className)}>
+          <Header className="lg:ml-64" onMenuClick={() => setSidebarOpen(true)} />
+          <main className={cn('flex-1 p-4 sm:p-6 lg:ml-64', className)}>
             {children}
           </main>
         </div>
