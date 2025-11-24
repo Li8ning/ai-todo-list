@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from './ui/Button';
 import { Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter } from './ui/Modal';
 import { createAIService } from '../services/aiService';
+import { useActivities } from '../hooks/useActivities';
 import type { AIGeneratedTodo, AIGenerationOptions } from '../services/aiService';
 import type { Project, Todo } from '../types/todo';
 
@@ -20,6 +21,7 @@ export function AIPromptModal({
   existingTodos,
   onTodosGenerated
 }: AIPromptModalProps) {
+  const { addActivity } = useActivities();
   const [prompt, setPrompt] = useState('');
   const [style, setStyle] = useState<AIGenerationOptions['style']>('simple');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -53,6 +55,7 @@ export function AIPromptModal({
 
       const generatedTodos = await aiService.generateTodos(prompt, projectContext, options);
       onTodosGenerated(generatedTodos);
+      addActivity('ai_generation', `Generated ${generatedTodos.length} todos with AI for "${project.name}"`, { projectId: project.id });
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate todos');

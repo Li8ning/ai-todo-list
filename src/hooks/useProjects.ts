@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Project } from '../types/todo';
 import { ProjectStorage } from '../services/projectStorage';
+import { useActivities } from './useActivities';
 
 export function useProjects(onProjectDelete?: (projectId: string) => void) {
+  const { addActivity } = useActivities();
   const [projects, setProjects] = useState<Project[]>(() => {
     const stored = ProjectStorage.getProjects();
     return stored.length > 0 ? stored : ProjectStorage.getDefaultProjects();
@@ -24,23 +26,39 @@ export function useProjects(onProjectDelete?: (projectId: string) => void) {
     };
 
     setProjects(prev => [...prev, newProject]);
+
+    // Log activity
+    addActivity('project_created', `Created project: "${name}"`, { projectId: newProject.id });
+
     return newProject.id;
-  }, []);
+  }, [addActivity]);
 
   const updateProject = useCallback((id: string, updates: Partial<Pick<Project, 'name' | 'description' | 'color'>>) => {
+    const project = projects.find(p => p.id === id);
+    if (!project) return;
+
     setProjects(prev => prev.map(project =>
       project.id === id
         ? { ...project, ...updates, updatedAt: new Date() }
         : project
     ));
-  }, []);
+
+    // Log activity
+    addActivity('project_edited', `Edited project: "${project.name}"`, { projectId: id });
+  }, [projects, addActivity]);
 
   const deleteProject = useCallback((id: string) => {
+    const project = projects.find(p => p.id === id);
+    if (!project) return;
+
     // Call the cascade delete callback if provided
     onProjectDelete?.(id);
 
     setProjects(prev => prev.filter(project => project.id !== id));
-  }, [onProjectDelete]);
+
+    // Log activity
+    addActivity('project_deleted', `Deleted project: "${project.name}"`, { projectId: id });
+  }, [projects, onProjectDelete, addActivity]);
 
   const getProjectById = useCallback((id?: string) => {
     if (!id) return undefined;

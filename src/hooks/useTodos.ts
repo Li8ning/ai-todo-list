@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Fuse from 'fuse.js';
 import type { Todo, TodoPriority, TodoFilter, TodoStats, TodoStatus } from '../types/todo';
 import { TodoStorage } from '../services/todoStorage';
+import { useActivities } from './useActivities';
+import { useProjects } from './useProjects';
 
 interface TodoAction {
   type: 'add' | 'update' | 'delete' | 'reorder';
@@ -10,6 +12,8 @@ interface TodoAction {
 }
 
 export function useTodos() {
+  const { addActivity } = useActivities();
+  const { getProjectById } = useProjects();
   const [todos, setTodos] = useState<Todo[]>(() => {
     const storedTodos = TodoStorage.getTodos();
     // Migrate any existing 'in-progress' todos to 'pending'
@@ -66,10 +70,17 @@ export function useTodos() {
       payload: newTodo,
       previousState,
     });
-  }, [todos, addAction]);
+
+    // Log activity
+    const project = getProjectById(projectId);
+    addActivity('todo_created', `Created "${title}"`, { projectId, projectName: project?.name });
+  }, [todos, addAction, addActivity, getProjectById]);
 
   const updateTodo = useCallback((id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId' | 'order'>>) => {
     const previousState = [...todos];
+    const todo = todos.find(t => t.id === id);
+    if (!todo) return;
+
     setTodos(prev => prev.map(todo =>
       todo.id === id
         ? { ...todo, ...updates, updatedAt: new Date() }
@@ -81,11 +92,24 @@ export function useTodos() {
       payload: { id, updates },
       previousState,
     });
-  }, [todos, addAction]);
+
+    // Log activity based on what was updated
+    const projectId = updates.projectId || todo.projectId;
+    const project = getProjectById(projectId);
+    if (updates.status === 'completed') {
+      addActivity('todo_completed', `Completed "${todo.title}"`, { projectId, projectName: project?.name });
+    } else if (updates.status === 'pending') {
+      addActivity('todo_incomplete', `Marked incomplete "${todo.title}"`, { projectId, projectName: project?.name });
+    } else {
+      addActivity('todo_edited', `Edited "${todo.title}"`, { projectId, projectName: project?.name });
+    }
+  }, [todos, addAction, addActivity, getProjectById]);
 
   const deleteTodo = useCallback((id: string) => {
     const previousState = [...todos];
     const todoToDelete = todos.find(t => t.id === id);
+    if (!todoToDelete) return;
+
     setTodos(prev => prev.filter(todo => todo.id !== id));
 
     addAction({
@@ -93,7 +117,11 @@ export function useTodos() {
       payload: todoToDelete,
       previousState,
     });
-  }, [todos, addAction]);
+
+    // Log activity
+    const project = getProjectById(todoToDelete.projectId);
+    addActivity('todo_deleted', `Deleted "${todoToDelete.title}"`, { projectId: todoToDelete.projectId, projectName: project?.name });
+  }, [todos, addAction, addActivity, getProjectById]);
 
   const reorderTodos = useCallback((startIndex: number, endIndex: number) => {
     const previousState = [...todos];

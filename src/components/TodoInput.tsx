@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { DatePicker } from './DatePicker';
+import { useActivities } from '../hooks/useActivities';
 import type { TodoPriority, Project } from '../types/todo';
 
 interface TodoInputProps {
@@ -13,6 +14,7 @@ interface TodoInputProps {
 }
 
 export function TodoInput({ onAdd, projects, placeholder = "What needs to be done?", defaultProjectId, hideProjectSelector = false }: TodoInputProps) {
+  const { addActivity } = useActivities();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TodoPriority>('medium');
@@ -28,6 +30,8 @@ export function TodoInput({ onAdd, projects, placeholder = "What needs to be don
     if (title.trim()) {
       const finalProjectId = hideProjectSelector ? defaultProjectId : projectId;
       onAdd(title.trim(), description.trim() || undefined, priority, dueDate, finalProjectId);
+      const project = projects.find(p => p.id === finalProjectId);
+      addActivity('todo_created', `Created "${title.trim()}"`, { projectId: finalProjectId, projectName: project?.name });
       setTitle('');
       setDescription('');
       setDueDate(undefined);

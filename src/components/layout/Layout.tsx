@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { cn } from '../../utils/cn';
 import type { Project } from '../../types/todo';
+import type { User } from '../../types/auth';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface LayoutProps {
   onNewProject?: () => void;
   onProjectClick?: (projectId: string) => void;
   activeItem?: string;
+  user?: User | null;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -19,7 +21,8 @@ export const Layout: React.FC<LayoutProps> = ({
   projects,
   onNewProject,
   onProjectClick,
-  activeItem
+  activeItem,
+  user
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -56,6 +59,7 @@ export const Layout: React.FC<LayoutProps> = ({
           <Header
             className="lg:ml-64"
             onMenuClick={() => setSidebarOpen(true)}
+            user={user}
           />
           <main className={cn('flex-1 p-4 sm:p-6 lg:ml-64', className)}>
             {children}

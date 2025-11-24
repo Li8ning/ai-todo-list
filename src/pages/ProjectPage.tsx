@@ -10,6 +10,7 @@ import { AITodoReviewModal } from '../components/AITodoReviewModal';
 import { useTodos } from '../hooks/useTodos';
 import { useProjects } from '../hooks/useProjects';
 import { useSavedFilters } from '../hooks/useSavedFilters';
+import { useActivities } from '../hooks/useActivities';
 import type { TodoFilter, Todo } from '../types/todo';
 import type { AIGeneratedTodo } from '../services/aiService';
 
@@ -32,6 +33,7 @@ export const ProjectPage = () => {
 
   const { projects, updateProject, deleteProject, getProjectById } = useProjects();
   const { savedFilters, saveFilter, deleteFilter } = useSavedFilters();
+  const { addActivity } = useActivities();
 
   const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
   const [selectedTodoIds, setSelectedTodoIds] = useState<string[]>([]);
@@ -122,6 +124,7 @@ export const ProjectPage = () => {
     selectedTodoIds.forEach(id => {
       deleteTodo(id);
     });
+    addActivity('bulk_operation', `Bulk deleted ${selectedTodoIds.length} todos`, { projectId });
     setSelectedTodoIds([]);
     setBulkSelectMode(false);
     setShowBulkDeleteModal(false);

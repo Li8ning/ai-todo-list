@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Project } from '../types/todo';
 import { Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter, Button, Input } from './ui';
+import { useActivities } from '../hooks/useActivities';
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ const PROJECT_COLORS = [
 ];
 
 export function ProjectModal({ isOpen, onClose, onSave, project, title }: ProjectModalProps) {
+  const { addActivity } = useActivities();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [color, setColor] = useState(PROJECT_COLORS[0]);
@@ -45,6 +47,12 @@ export function ProjectModal({ isOpen, onClose, onSave, project, title }: Projec
       description: description.trim() || undefined,
       color,
     });
+
+    if (project) {
+      addActivity('project_edited', `Edited project "${name.trim()}"`, { projectId: project.id });
+    } else {
+      addActivity('project_created', `Created project "${name.trim()}"`);
+    }
 
     onClose();
   };
