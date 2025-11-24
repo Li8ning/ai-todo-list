@@ -194,7 +194,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNewProject }) => {
                 projects={projects}
                 onUpdate={updateTodo}
                 onDelete={deleteTodo}
-                onReorder={reorderTodos}
+                onReorder={(activeId, overId) => {
+                  const oldIndex = todos.findIndex((todo) => todo.id === activeId);
+                  const newIndex = todos.findIndex((todo) => todo.id === overId);
+                  reorderTodos(oldIndex, newIndex);
+                }}
                 selectedIds={selectedTodoIds}
                 onSelectionChange={setSelectedTodoIds}
                 onBulkUpdate={handleBulkUpdate}

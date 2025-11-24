@@ -24,7 +24,6 @@ export const ProjectPage = () => {
     addTodo,
     updateTodo,
     deleteTodo,
-    reorderTodos,
     undo,
     redo,
     canUndo,
@@ -37,6 +36,7 @@ export const ProjectPage = () => {
   const [showDeleteProjectModal, setShowDeleteProjectModal] = useState(false);
   const [selectedTodoIds, setSelectedTodoIds] = useState<string[]>([]);
   const [bulkSelectMode, setBulkSelectMode] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [editingDescription, setEditingDescription] = useState(false);
   const [tempName, setTempName] = useState('');
@@ -113,11 +113,18 @@ export const ProjectPage = () => {
   };
 
   const handleBulkDelete = () => {
+    if (selectedTodoIds.length > 0) {
+      setShowBulkDeleteModal(true);
+    }
+  };
+
+  const confirmBulkDelete = () => {
     selectedTodoIds.forEach(id => {
       deleteTodo(id);
     });
     setSelectedTodoIds([]);
     setBulkSelectMode(false);
+    setShowBulkDeleteModal(false);
   };
 
   const handleAIGenerate = (todos: AIGeneratedTodo[]) => {
@@ -344,7 +351,20 @@ export const ProjectPage = () => {
             projects={projects}
             onUpdate={updateTodo}
             onDelete={deleteTodo}
-            onReorder={reorderTodos}
+            onReorder={(activeId, overId) => {
+              const oldIndex = todos.findIndex((todo) => todo.id === activeId);
+              const newIndex = todos.findIndex((todo) => todo.id === overId);
+              if (oldIndex !== -1 && newIndex !== -1) {
+                // Reorder within project todos
+                const reordered = [...todos];
+                const [removed] = reordered.splice(oldIndex, 1);
+                reordered.splice(newIndex, 0, removed);
+                // Update order properties
+                reordered.forEach((todo, index) => {
+                  updateTodo(todo.id, { order: index });
+                });
+              }
+            }}
             selectedIds={selectedTodoIds}
             onSelectionChange={setSelectedTodoIds}
             onBulkUpdate={handleBulkUpdate}
@@ -401,6 +421,30 @@ export const ProjectPage = () => {
         generatedTodos={generatedTodos}
         onAcceptTodos={handleAcceptAITodos}
       />
+
+      {/* Bulk Delete Confirmation Modal */}
+      <Modal
+        isOpen={showBulkDeleteModal}
+        onClose={() => setShowBulkDeleteModal(false)}
+      >
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Selected Tasks</h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Are you sure you want to delete {selectedTodoIds.length} selected task{selectedTodoIds.length !== 1 ? 's' : ''}? This action cannot be undone.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <Button variant="ghost" onClick={() => setShowBulkDeleteModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={confirmBulkDelete}
+            >
+              Delete {selectedTodoIds.length} Task{selectedTodoIds.length !== 1 ? 's' : ''}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -11,7 +11,7 @@ import type { Todo, TodoStatus, TodoPriority, Project } from '../types/todo';
 interface TodoItemProps {
   todo: Todo;
   projects: Project[];
-  onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId'>>) => void;
+  onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId' | 'order'>>) => void;
   onDelete: (id: string) => void;
   isDragging?: boolean;
   dragListeners?: unknown;

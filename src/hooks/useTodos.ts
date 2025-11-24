@@ -68,7 +68,7 @@ export function useTodos() {
     });
   }, [todos, addAction]);
 
-  const updateTodo = useCallback((id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId'>>) => {
+  const updateTodo = useCallback((id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId' | 'order'>>) => {
     const previousState = [...todos];
     setTodos(prev => prev.map(todo =>
       todo.id === id

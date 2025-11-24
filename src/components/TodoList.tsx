@@ -65,9 +65,9 @@ function SortableTodoItem({ todo, projects, onUpdate, onDelete, isSelected, onTo
 interface TodoListProps {
   todos: Todo[];
   projects: Project[];
-  onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId'>>) => void;
+  onUpdate: (id: string, updates: Partial<Pick<Todo, 'title' | 'description' | 'status' | 'priority' | 'dueDate' | 'projectId' | 'order'>>) => void;
   onDelete: (id: string) => void;
-  onReorder: (startIndex: number, endIndex: number) => void;
+  onReorder: (activeId: string, overId: string) => void;
   selectedIds?: string[];
   onSelectionChange?: (ids: string[]) => void;
   onBulkUpdate?: (updates: Partial<Todo>) => void;
@@ -96,10 +96,7 @@ export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selec
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
-      const oldIndex = todos.findIndex((todo) => todo.id === active.id);
-      const newIndex = todos.findIndex((todo) => todo.id === over.id);
-
-      onReorder(oldIndex, newIndex);
+      onReorder(active.id as string, over.id as string);
     }
   }
 
