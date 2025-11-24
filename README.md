@@ -1,4 +1,4 @@
-# AI-Enhanced To-Do List
+# AI TickUP
 
 A modern, feature-rich to-do list application that integrates artificial intelligence to assist in task generation and organization, providing a smart and intuitive user experience.
 

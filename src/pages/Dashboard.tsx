@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Card, CardHeader, CardTitle, CardContent, Modal } from '../components/ui';
 import { TodoInput } from '../components/TodoInput';
 import { TodoList } from '../components/TodoList';
@@ -13,6 +13,9 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ onNewProject }) => {
+  useEffect(() => {
+    document.title = "Dashboard - AI TickUP";
+  }, []);
 
   const {
     todos,

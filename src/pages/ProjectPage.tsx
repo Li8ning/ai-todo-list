@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Card, CardHeader, CardTitle, CardContent } from '../components/ui';
 import { TodoInput } from '../components/TodoInput';
@@ -48,6 +48,12 @@ export const ProjectPage = () => {
   const [generatedTodos, setGeneratedTodos] = useState<AIGeneratedTodo[]>([]);
 
   const project = projectId ? getProjectById(projectId) : null;
+
+  useEffect(() => {
+    if (project) {
+      document.title = `${project.name} - AI TickUP`;
+    }
+  }, [project]);
 
   // Filter todos for this project
   const todos = useMemo(() => {

@@ -1,6 +1,10 @@
+import { useEffect } from 'react';
 import { ActivityFeed } from '../components/ActivityFeed';
 
 export const InboxPage = () => {
+  useEffect(() => {
+    document.title = "Inbox - AI TickUP";
+  }, []);
   return (
     <div className="max-w-4xl mx-auto h-full">
       <div className="px-6 py-8">
