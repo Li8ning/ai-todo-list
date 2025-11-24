@@ -75,7 +75,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNewProject }) => {
     onNewProject?.();
   };
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-full sm:max-w-6xl mx-auto">
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Todo Dashboard
@@ -151,16 +151,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNewProject }) => {
           />
 
           {/* Todo List - Full Width */}
-          <Card>
+          <Card padding="none">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle>
                   {filter.status === 'all' ? 'All Todos' :
                    filter.status === 'pending' ? 'Pending Tasks' :
                    filter.status === 'completed' ? 'Completed Tasks' :
                    'Filtered Todos'}
                 </CardTitle>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 sm:justify-end">
                   {!bulkSelectMode && todos.length > 0 && (
                     <Button
                       variant="secondary"

@@ -28,9 +28,9 @@ export function PriorityBadge({ priority, className = '' }: PriorityBadgeProps) 
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${config.color} ${className}`}
+      className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs sm:text-xs font-medium rounded-full border ${config.color} ${className}`}
     >
-      <span>{config.icon}</span>
+      <span className="text-sm">{config.icon}</span>
       <span>{config.label}</span>
     </span>
   );

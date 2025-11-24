@@ -96,7 +96,7 @@ export const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes
     return (
       <div
         ref={ref}
-        className={cn('p-6 pt-0', className)}
+        className={cn('p-2 sm:p-6 pt-0', className)}
         {...props}
       />
     );

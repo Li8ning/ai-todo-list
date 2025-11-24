@@ -61,7 +61,7 @@ export const Layout: React.FC<LayoutProps> = ({
             onMenuClick={() => setSidebarOpen(true)}
             user={user}
           />
-          <main className={cn('flex-1 p-4 sm:p-6 lg:ml-64', className)}>
+          <main className={cn('flex-1 p-2 sm:p-4 lg:ml-64', className)}>
             {children}
           </main>
         </div>

@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   DndContext,
   closestCenter,
@@ -29,7 +30,7 @@ interface SortableTodoItemProps {
   showBulkSelect?: boolean;
 }
 
-function SortableTodoItem({ todo, projects, onUpdate, onDelete, isSelected, onToggleSelect, showBulkSelect }: SortableTodoItemProps) {
+const SortableTodoItem = React.memo(function SortableTodoItem({ todo, projects, onUpdate, onDelete, isSelected, onToggleSelect, showBulkSelect }: SortableTodoItemProps) {
   const {
     attributes,
     listeners,
@@ -60,7 +61,7 @@ function SortableTodoItem({ todo, projects, onUpdate, onDelete, isSelected, onTo
       />
     </div>
   );
-}
+});
 
 interface TodoListProps {
   todos: Todo[];
@@ -75,7 +76,7 @@ interface TodoListProps {
   bulkSelectMode?: boolean;
 }
 
-export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selectedIds = [], onSelectionChange, onBulkUpdate, onBulkDelete, bulkSelectMode = false }: TodoListProps) {
+export const TodoList = React.memo(function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selectedIds = [], onSelectionChange, onBulkUpdate, onBulkDelete, bulkSelectMode = false }: TodoListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -100,6 +101,8 @@ export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selec
     }
   }
 
+  const isLargeList = todos.length > 100;
+
   if (todos.length === 0) {
     return (
       <div className="text-center py-12">
@@ -115,25 +118,25 @@ export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selec
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Bulk Actions Toolbar */}
       {bulkSelectMode && (
-        <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2 p-3 sm:p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          <span className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2 sm:mb-0">
             {selectedIds.length} selected
           </span>
-          <div className="flex gap-2 ml-auto">
+          <div className="flex flex-wrap gap-2 sm:ml-auto w-full sm:w-auto">
             {onSelectionChange && (
               <>
                 <button
                   onClick={() => onSelectionChange(todos.map(todo => todo.id))}
-                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                  className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors whitespace-nowrap"
                 >
                   Select All
                 </button>
                 <button
                   onClick={() => onSelectionChange([])}
-                  className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                  className="px-3 py-1.5 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors whitespace-nowrap"
                 >
                   Deselect All
                 </button>
@@ -143,58 +146,76 @@ export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selec
               <>
                 <button
                   onClick={() => onBulkUpdate({ status: 'completed' })}
-                  className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                  className="px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors whitespace-nowrap"
                 >
-                  Mark Complete
+                  ✓ Complete
                 </button>
                 <button
                   onClick={() => onBulkUpdate({ status: 'pending' })}
-                  className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors"
+                  className="px-3 py-1.5 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors whitespace-nowrap"
                 >
-                  Mark Pending
+                  ○ Pending
                 </button>
                 <button
                   onClick={() => onBulkUpdate({ priority: 'high' })}
-                  className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                  className="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors whitespace-nowrap"
                 >
-                  Set High Priority
+                  ⚠ High
                 </button>
               </>
             )}
             {selectedIds.length > 0 && onBulkDelete && (
               <button
                 onClick={onBulkDelete}
-                className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                className="px-3 py-1.5 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors whitespace-nowrap"
               >
-                Delete Selected
+                🗑️ Delete
               </button>
             )}
           </div>
         </div>
       )}
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={todos.map(todo => todo.id)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-3">
-            {todos.map((todo) => (
-              <SortableTodoItem
-                key={todo.id}
-                todo={todo}
-                projects={projects}
-                onUpdate={onUpdate}
-                onDelete={onDelete}
-                isSelected={selectedIds.includes(todo.id)}
-                onToggleSelect={bulkSelectMode ? handleToggleSelect : undefined}
-                showBulkSelect={bulkSelectMode}
-              />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      {isLargeList ? (
+        // For large lists, disable drag and drop for performance
+        <div className="space-y-3 sm:space-y-3">
+          {todos.map((todo) => (
+            <TodoItem
+              key={todo.id}
+              todo={todo}
+              projects={projects}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+              isSelected={selectedIds.includes(todo.id)}
+              onToggleSelect={bulkSelectMode ? handleToggleSelect : undefined}
+              showBulkSelect={bulkSelectMode}
+            />
+          ))}
+        </div>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={todos.map(todo => todo.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-3 sm:space-y-3">
+              {todos.map((todo) => (
+                <SortableTodoItem
+                  key={todo.id}
+                  todo={todo}
+                  projects={projects}
+                  onUpdate={onUpdate}
+                  onDelete={onDelete}
+                  isSelected={selectedIds.includes(todo.id)}
+                  onToggleSelect={bulkSelectMode ? handleToggleSelect : undefined}
+                  showBulkSelect={bulkSelectMode}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
     </div>
   );
-}
+});

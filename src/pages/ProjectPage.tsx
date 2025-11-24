@@ -171,7 +171,7 @@ export const ProjectPage = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-full sm:max-w-6xl mx-auto">
       {/* Back to Dashboard */}
       <div className="mb-6">
         <Button
@@ -287,14 +287,14 @@ export const ProjectPage = () => {
 
       {/* Add Todo */}
       <div className="mb-6">
-        <div className="flex gap-3 items-start">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-start">
           <div className="flex-1">
             <TodoInput onAdd={addTodo} projects={projects} defaultProjectId={projectId} hideProjectSelector={true} />
           </div>
           <Button
             variant="secondary"
             onClick={() => setShowAIPromptModal(true)}
-            className="whitespace-nowrap"
+            className="w-full sm:w-auto sm:whitespace-nowrap"
             leftIcon="🤖"
           >
             Generate with AI
@@ -314,13 +314,13 @@ export const ProjectPage = () => {
       />
 
       {/* Todo List */}
-      <Card>
+      <Card padding="none">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <CardTitle>
               Project Todos
             </CardTitle>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:justify-end">
               {!bulkSelectMode && todos.length > 0 && (
                 <Button
                   variant="secondary"

@@ -22,7 +22,6 @@ A modern, feature-rich to-do list application that integrates artificial intelli
 ### User Experience
 - **Intuitive Interface**: Clean, uncluttered design with minimal friction
 - **Dark/Light Theme**: Toggle between themes for comfortable viewing
-- **Keyboard Navigation**: Full keyboard support for accessibility
 - **Visual Feedback**: Animations and cues enhance usability and satisfaction
 
 ## 🛠️ Tech Stack
@@ -80,11 +79,6 @@ A modern, feature-rich to-do list application that integrates artificial intelli
 2. Enter a natural language prompt (e.g., "Plan a marketing campaign for a new product")
 3. Review the generated tasks in the modal
 4. Edit, select, or discard tasks before adding them to your project
-
-### Keyboard Shortcuts
-- `Enter`: Add new task
-- `Escape`: Close modals
-- `Tab`: Navigate between elements
 
 ## 🏗️ Project Structure
 

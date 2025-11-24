@@ -3,6 +3,7 @@ import { Button } from './ui/Button';
 import { Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter } from './ui/Modal';
 import { createAIService } from '../services/aiService';
 import { useActivities } from '../hooks/useActivities';
+import { useToast } from '../hooks/useToast';
 import type { AIGeneratedTodo, AIGenerationOptions } from '../services/aiService';
 import type { Project, Todo } from '../types/todo';
 
@@ -22,16 +23,15 @@ export function AIPromptModal({
   onTodosGenerated
 }: AIPromptModalProps) {
   const { addActivity } = useActivities();
+  const { error: showError } = useToast();
   const [prompt, setPrompt] = useState('');
   const [style, setStyle] = useState<AIGenerationOptions['style']>('simple');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
 
     setIsGenerating(true);
-    setError(null);
 
     try {
       const aiService = createAIService();
@@ -58,7 +58,7 @@ export function AIPromptModal({
       addActivity('ai_generation', `Generated ${generatedTodos.length} todos with AI for "${project.name}"`, { projectId: project.id });
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate todos');
+      showError(err instanceof Error ? err.message : 'Failed to generate todos');
     } finally {
       setIsGenerating(false);
     }
@@ -67,7 +67,6 @@ export function AIPromptModal({
   const handleClose = () => {
     if (!isGenerating) {
       setPrompt('');
-      setError(null);
       onClose();
     }
   };
@@ -127,12 +126,6 @@ export function AIPromptModal({
             </select>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </div>
-          )}
 
           {/* Loading State */}
           {isGenerating && (

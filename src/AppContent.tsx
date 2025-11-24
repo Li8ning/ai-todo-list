@@ -1,21 +1,26 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
-import { ProjectPage } from './pages/ProjectPage';
 import { InboxPage } from './pages/InboxPage';
-import { ProjectModal } from './components/ProjectModal';
-import { LoginModal } from './components/LoginModal';
-import { SignupModal } from './components/SignupModal';
+import { ToastContainer, Spinner } from './components/ui';
 import { useProjects } from './hooks/useProjects';
 import { useAuth } from './hooks/useAuth';
+import { useToast } from './hooks/useToast';
 import type { Project } from './types/todo';
+
+// Lazy load heavy components
+const ProjectPage = lazy(() => import('./pages/ProjectPage').then(module => ({ default: module.ProjectPage })));
+const ProjectModal = lazy(() => import('./components/ProjectModal').then(module => ({ default: module.ProjectModal })));
+const LoginModal = lazy(() => import('./components/LoginModal').then(module => ({ default: module.LoginModal })));
+const SignupModal = lazy(() => import('./components/SignupModal').then(module => ({ default: module.SignupModal })));
 
 export const AppContent = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { projects, addProject, updateProject } = useProjects();
   const { isAuthenticated, user } = useAuth();
+  const { toasts, removeToast } = useToast();
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -60,7 +65,7 @@ export const AppContent = () => {
   // Show login modal if not authenticated
   if (!isAuthenticated) {
     return (
-      <>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>}>
         <LoginModal
           isOpen={showLoginModal || true} // Always show if not authenticated
           onClose={() => {}} // Prevent closing
@@ -80,32 +85,39 @@ export const AppContent = () => {
             setShowLoginModal(true);
           }}
         />
-      </>
+      </Suspense>
     );
   }
 
   return (
-    <Layout
-      projects={projects}
-      onNewProject={handleNewProject}
-      onProjectClick={handleProjectClick}
-      activeItem={activeItem}
-      user={user}
-    >
-      <Routes>
-        <Route path="/" element={<Dashboard onNewProject={handleNewProject} />} />
-        <Route path="/inbox" element={<InboxPage />} />
-        <Route path="/project/:projectId" element={<ProjectPage />} />
-      </Routes>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>}>
+      <Layout
+        projects={projects}
+        onNewProject={handleNewProject}
+        onProjectClick={handleProjectClick}
+        activeItem={activeItem}
+        user={user}
+      >
+        <Routes>
+          <Route path="/" element={<Dashboard onNewProject={handleNewProject} />} />
+          <Route path="/inbox" element={<InboxPage />} />
+          <Route path="/project/:projectId" element={<ProjectPage />} />
+        </Routes>
 
-      {/* Project Modal */}
-      <ProjectModal
-        isOpen={showProjectModal}
-        onClose={() => setShowProjectModal(false)}
-        onSave={handleSaveProject}
-        project={editingProject || undefined}
-        title={editingProject ? 'Edit Project' : 'Create New Project'}
-      />
-    </Layout>
+        {/* Project Modal */}
+        <Suspense fallback={<Spinner />}>
+          <ProjectModal
+            isOpen={showProjectModal}
+            onClose={() => setShowProjectModal(false)}
+            onSave={handleSaveProject}
+            project={editingProject || undefined}
+            title={editingProject ? 'Edit Project' : 'Create New Project'}
+          />
+        </Suspense>
+      </Layout>
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+    </Suspense>
   );
 };

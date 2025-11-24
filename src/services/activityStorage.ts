@@ -14,7 +14,9 @@ export const activityStorage = {
         .filter(activity => activity.userId === userId)
         .map(activity => ({
           ...activity,
-          timestamp: new Date(activity.timestamp)
+          type: activity.type as ActivityType,
+          timestamp: new Date(activity.timestamp),
+          metadata: activity.metadata as Record<string, unknown> | undefined
         }))
         .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()); // Most recent first
     } catch {
