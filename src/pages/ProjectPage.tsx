@@ -5,10 +5,13 @@ import { TodoInput } from '../components/TodoInput';
 import { TodoList } from '../components/TodoList';
 import { TodoFilters } from '../components/TodoFilters';
 import { Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter } from '../components/ui/Modal';
+import { AIPromptModal } from '../components/AIPromptModal';
+import { AITodoReviewModal } from '../components/AITodoReviewModal';
 import { useTodos } from '../hooks/useTodos';
 import { useProjects } from '../hooks/useProjects';
 import { useSavedFilters } from '../hooks/useSavedFilters';
 import type { TodoFilter, Todo } from '../types/todo';
+import type { AIGeneratedTodo } from '../services/aiService';
 
 export const ProjectPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -38,6 +41,9 @@ export const ProjectPage = () => {
   const [editingDescription, setEditingDescription] = useState(false);
   const [tempName, setTempName] = useState('');
   const [tempDescription, setTempDescription] = useState('');
+  const [showAIPromptModal, setShowAIPromptModal] = useState(false);
+  const [showAITodoReviewModal, setShowAITodoReviewModal] = useState(false);
+  const [generatedTodos, setGeneratedTodos] = useState<AIGeneratedTodo[]>([]);
 
   const project = projectId ? getProjectById(projectId) : null;
 
@@ -112,6 +118,28 @@ export const ProjectPage = () => {
     });
     setSelectedTodoIds([]);
     setBulkSelectMode(false);
+  };
+
+  const handleAIGenerate = (todos: AIGeneratedTodo[]) => {
+    setGeneratedTodos(todos);
+    setShowAIPromptModal(false);
+    setShowAITodoReviewModal(true);
+  };
+
+  const handleAcceptAITodos = (todos: AIGeneratedTodo[]) => {
+    todos.forEach(todo => {
+      // Don't include due dates that are in the past to avoid immediate "overdue" styling
+      const dueDate = todo.dueDate && todo.dueDate >= new Date() ? todo.dueDate : undefined;
+      addTodo(
+        todo.title,
+        todo.description,
+        todo.priority,
+        dueDate,
+        projectId
+      );
+    });
+    setShowAITodoReviewModal(false);
+    setGeneratedTodos([]);
   };
 
   if (!project) {
@@ -249,7 +277,19 @@ export const ProjectPage = () => {
 
       {/* Add Todo */}
       <div className="mb-6">
-        <TodoInput onAdd={addTodo} projects={projects} defaultProjectId={projectId} hideProjectSelector={true} />
+        <div className="flex gap-3 items-start">
+          <div className="flex-1">
+            <TodoInput onAdd={addTodo} projects={projects} defaultProjectId={projectId} hideProjectSelector={true} />
+          </div>
+          <Button
+            variant="secondary"
+            onClick={() => setShowAIPromptModal(true)}
+            className="whitespace-nowrap"
+            leftIcon="🤖"
+          >
+            Generate with AI
+          </Button>
+        </div>
       </div>
 
       {/* Filters and Stats */}
@@ -344,6 +384,23 @@ export const ProjectPage = () => {
           </Button>
         </ModalFooter>
       </Modal>
+
+      {/* AI Prompt Modal */}
+      <AIPromptModal
+        isOpen={showAIPromptModal}
+        onClose={() => setShowAIPromptModal(false)}
+        project={project}
+        existingTodos={todos}
+        onTodosGenerated={handleAIGenerate}
+      />
+
+      {/* AI Todo Review Modal */}
+      <AITodoReviewModal
+        isOpen={showAITodoReviewModal}
+        onClose={() => setShowAITodoReviewModal(false)}
+        generatedTodos={generatedTodos}
+        onAcceptTodos={handleAcceptAITodos}
+      />
     </div>
   );
 };

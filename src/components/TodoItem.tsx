@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { isBefore, startOfDay } from 'date-fns';
 import { Button } from './ui/Button';
 import { Badge } from './ui/Badge';
 import { Modal } from './ui/Modal';
@@ -54,7 +55,7 @@ export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = fals
   };
 
 
-  const isOverdue = todo.dueDate && todo.dueDate < new Date() && todo.status !== 'completed';
+  const isOverdue = todo.dueDate && isBefore(startOfDay(todo.dueDate), startOfDay(new Date())) && todo.status !== 'completed';
   const project = projects.find(p => p.id === todo.projectId);
 
   return (

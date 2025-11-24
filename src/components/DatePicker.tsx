@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { format, addDays, endOfWeek, addWeeks } from 'date-fns';
+import { format, addDays, endOfWeek, addWeeks, isBefore, startOfDay } from 'date-fns';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
 
@@ -26,7 +26,22 @@ export function DatePicker({ selected, onSelect, placeholder = "Pick a date", cl
 
   return (
     <>
+      <style>
+        {`
+          .rdp-day_button:disabled {
+            color: #6b7280 !important;
+            opacity: 0.5 !important;
+            cursor: no-drop !important;
+          }
+          .dark .rdp-day_button:disabled {
+            color: #9ca3af !important;
+            opacity: 0.5 !important;
+            cursor: no-drop !important;
+          }
+        `}
+      </style>
       <button
+        type="button"
         onClick={() => setIsOpen(true)}
         className={`px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
       >
@@ -81,6 +96,7 @@ export function DatePicker({ selected, onSelect, placeholder = "Pick a date", cl
             mode="single"
             selected={selected}
             onSelect={handleSelect}
+            disabled={(date) => isBefore(startOfDay(date), startOfDay(new Date()))}
             className="border-0"
             classNames={{
               months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
@@ -101,7 +117,7 @@ export function DatePicker({ selected, onSelect, placeholder = "Pick a date", cl
               day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
               day_today: "bg-accent text-accent-foreground",
               day_outside: "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-              day_disabled: "text-muted-foreground opacity-50",
+              day_disabled: "!text-gray-500 !dark:text-gray-700 !bg-gray-200 !dark:bg-gray-900 !opacity-50 !cursor-not-allowed !pointer-events-none",
               day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
               day_hidden: "invisible",
             }}
