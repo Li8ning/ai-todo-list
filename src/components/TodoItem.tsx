@@ -5,7 +5,8 @@ import { Badge } from './ui/Badge';
 import { Modal } from './ui/Modal';
 import { ProjectBadge } from './ProjectSelector';
 import { PriorityBadge } from './PriorityBadge';
-import type { Todo, TodoStatus, Project } from '../types/todo';
+import { DatePicker } from './DatePicker';
+import type { Todo, TodoStatus, TodoPriority, Project } from '../types/todo';
 
 interface TodoItemProps {
   todo: Todo;
@@ -23,6 +24,8 @@ export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = fals
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(todo.title);
   const [editDescription, setEditDescription] = useState(todo.description || '');
+  const [editDueDate, setEditDueDate] = useState<Date | undefined>(todo.dueDate);
+  const [editPriority, setEditPriority] = useState<TodoPriority>(todo.priority);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleStatusChange = (newStatus: TodoStatus) => {
@@ -34,6 +37,8 @@ export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = fals
       onUpdate(todo.id, {
         title: editTitle.trim(),
         description: editDescription.trim() || undefined,
+        dueDate: editDueDate,
+        priority: editPriority,
       });
       setIsEditing(false);
     }
@@ -42,6 +47,8 @@ export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = fals
   const handleCancelEdit = () => {
     setEditTitle(todo.title);
     setEditDescription(todo.description || '');
+    setEditDueDate(todo.dueDate);
+    setEditPriority(todo.priority);
     setIsEditing(false);
   };
 
@@ -118,6 +125,33 @@ export function TodoItem({ todo, projects, onUpdate, onDelete, isDragging = fals
                     className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     rows={2}
                   />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Priority
+                      </label>
+                      <select
+                        value={editPriority}
+                        onChange={(e) => setEditPriority(e.target.value as TodoPriority)}
+                        className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Due Date
+                      </label>
+                      <DatePicker
+                        selected={editDueDate}
+                        onSelect={setEditDueDate}
+                        placeholder="No due date"
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={handleSaveEdit} disabled={!editTitle.trim()}>
                       Save

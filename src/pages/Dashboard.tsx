@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Card, CardHeader, CardTitle, CardContent } from '../components/ui';
+import { Button, Card, CardHeader, CardTitle, CardContent, Modal } from '../components/ui';
 import { TodoInput } from '../components/TodoInput';
 import { TodoList } from '../components/TodoList';
 import { TodoFilters } from '../components/TodoFilters';
@@ -34,6 +34,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNewProject }) => {
 
   const [selectedTodoIds, setSelectedTodoIds] = useState<string[]>([]);
   const [bulkSelectMode, setBulkSelectMode] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
   const handleSaveFilter = (name: string) => {
     saveFilter(name, filter);
@@ -56,11 +57,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNewProject }) => {
   };
 
   const handleBulkDelete = () => {
+    if (selectedTodoIds.length > 0) {
+      setShowBulkDeleteModal(true);
+    }
+  };
+
+  const confirmBulkDelete = () => {
     selectedTodoIds.forEach(id => {
       deleteTodo(id);
     });
     setSelectedTodoIds([]);
     setBulkSelectMode(false);
+    setShowBulkDeleteModal(false);
   };
 
   const handleNewProject = () => {
@@ -197,6 +205,30 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNewProject }) => {
           </Card>
         </>
       )}
+
+      {/* Bulk Delete Confirmation Modal */}
+      <Modal
+        isOpen={showBulkDeleteModal}
+        onClose={() => setShowBulkDeleteModal(false)}
+      >
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete Selected Tasks</h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Are you sure you want to delete {selectedTodoIds.length} selected task{selectedTodoIds.length !== 1 ? 's' : ''}? This action cannot be undone.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <Button variant="ghost" onClick={() => setShowBulkDeleteModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={confirmBulkDelete}
+            >
+              Delete {selectedTodoIds.length} Task{selectedTodoIds.length !== 1 ? 's' : ''}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

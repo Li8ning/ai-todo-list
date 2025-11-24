@@ -120,13 +120,29 @@ export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selec
   return (
     <div className="space-y-4">
       {/* Bulk Actions Toolbar */}
-      {selectedIds.length > 0 && (
+      {bulkSelectMode && (
         <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
           <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
             {selectedIds.length} selected
           </span>
           <div className="flex gap-2 ml-auto">
-            {onBulkUpdate && (
+            {onSelectionChange && (
+              <>
+                <button
+                  onClick={() => onSelectionChange(todos.map(todo => todo.id))}
+                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                >
+                  Select All
+                </button>
+                <button
+                  onClick={() => onSelectionChange([])}
+                  className="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                >
+                  Deselect All
+                </button>
+              </>
+            )}
+            {selectedIds.length > 0 && onBulkUpdate && (
               <>
                 <button
                   onClick={() => onBulkUpdate({ status: 'completed' })}
@@ -148,7 +164,7 @@ export function TodoList({ todos, projects, onUpdate, onDelete, onReorder, selec
                 </button>
               </>
             )}
-            {onBulkDelete && (
+            {selectedIds.length > 0 && onBulkDelete && (
               <button
                 onClick={onBulkDelete}
                 className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
