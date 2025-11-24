@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from './ui/Button';
 import { Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter } from './ui/Modal';
 import { DatePicker } from './DatePicker';
@@ -30,11 +30,6 @@ export function AITodoReviewModal({
     generatedTodos.map(() => true)
   );
 
-  // Sync state when generatedTodos changes
-  useEffect(() => {
-    setEditedTodos([...generatedTodos]);
-    setSelections(generatedTodos.map(() => true));
-  }, [generatedTodos]);
 
   // Derive todos with selections
   const todos: EditableTodo[] = editedTodos.map((todo, index) => ({
