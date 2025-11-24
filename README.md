@@ -1,73 +1,133 @@
-# React + TypeScript + Vite
+# AI-Enhanced To-Do List
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, feature-rich to-do list application that integrates artificial intelligence to assist in task generation and organization, providing a smart and intuitive user experience.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Core Functionality
+- **Project-Based Organization**: Group tasks into projects with descriptions and context
+- **Comprehensive Task Management**: Create, edit, delete tasks with titles, descriptions, priorities, and due dates
+- **Drag-and-Drop Reordering**: Easily reorder tasks within projects to reflect priority or workflow
+- **Status Tracking**: Mark tasks as pending or completed with visual indicators
+- **Bulk Actions**: Select multiple tasks for bulk updates (status, priority, deletion)
+- **Filtering and Sorting**: Filter tasks by status, priority, or due date for quick access
+- **Responsive Design**: Fully responsive interface that works seamlessly across desktop and mobile devices
 
-## React Compiler
+### AI-Powered Features
+- **AI Task Generation**: Provide natural language prompts to generate relevant to-do items
+- **Context-Aware Suggestions**: AI considers project details and existing tasks for relevant suggestions
+- **Customizable Generation**: Choose from different generation styles (simple, detailed, step-by-step)
+- **Review and Edit**: AI-generated tasks are presented in a review modal for editing and selection
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### User Experience
+- **Intuitive Interface**: Clean, uncluttered design with minimal friction
+- **Dark/Light Theme**: Toggle between themes for comfortable viewing
+- **Keyboard Navigation**: Full keyboard support for accessibility
+- **Visual Feedback**: Animations and cues enhance usability and satisfaction
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend Framework**: React 19 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS with PostCSS
+- **Routing**: React Router DOM
+- **State Management**: React Hooks and Context API
+- **Drag and Drop**: dnd-kit
+- **AI Integration**: Google Generative AI (Gemini)
+- **Linting**: ESLint with TypeScript support
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📦 Installation
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Li8ning/ai-todo-list.git
+   cd ai-todo-list
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+
+   Create a `.env` file in the root directory and add your Google Generative AI API key:
+   ```env
+   VITE_GEMINI_API_KEY=your_api_key_here
+   ```
+
+   Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey).
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser**
+
+   Navigate to `http://localhost:5173` to view the application.
+
+## 🚀 Usage
+
+### Getting Started
+1. **Create a Project**: Start by creating a project to organize your tasks
+2. **Add Tasks**: Use the input field to add tasks manually or generate them with AI
+3. **Organize**: Drag and drop tasks to reorder them by priority
+4. **Track Progress**: Mark tasks as completed and filter to focus on what's important
+
+### AI Task Generation
+1. Click the "Generate with AI" button in any project
+2. Enter a natural language prompt (e.g., "Plan a marketing campaign for a new product")
+3. Review the generated tasks in the modal
+4. Edit, select, or discard tasks before adding them to your project
+
+### Keyboard Shortcuts
+- `Enter`: Add new task
+- `Escape`: Close modals
+- `Tab`: Navigate between elements
+
+## 🏗️ Project Structure
+
+```
+src/
+├── components/          # Reusable UI components
+│   ├── layout/         # Layout components (Header, Sidebar, etc.)
+│   ├── ui/            # Generic UI elements (Button, Modal, etc.)
+│   └── ...            # Feature-specific components
+├── contexts/           # React contexts for global state
+├── hooks/             # Custom React hooks
+├── pages/             # Top-level page components
+├── services/          # External service integrations
+├── types/             # TypeScript type definitions
+└── utils/             # Utility functions
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🤝 Contributing
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📝 Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run preview` - Preview production build
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Google Generative AI](https://ai.google.dev/) for AI task generation
+- [dnd-kit](https://dndkit.com/) for drag-and-drop functionality
+- [Tailwind CSS](https://tailwindcss.com/) for styling
+- [React](https://reactjs.org/) for the UI framework
+
+---
+
+Built with ❤️ using React, TypeScript, and AI
