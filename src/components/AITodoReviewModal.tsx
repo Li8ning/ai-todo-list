@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/Button';
 import { Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter } from './ui/Modal';
 import { DatePicker } from './DatePicker';
@@ -23,12 +23,14 @@ export function AITodoReviewModal({
   generatedTodos,
   onAcceptTodos
 }: AITodoReviewModalProps) {
-  const [editedTodos, setEditedTodos] = useState<AIGeneratedTodo[]>(() =>
-    [...generatedTodos]
-  );
-  const [selections, setSelections] = useState<boolean[]>(() =>
-    generatedTodos.map(() => true)
-  );
+  const [editedTodos, setEditedTodos] = useState<AIGeneratedTodo[]>([]);
+  const [selections, setSelections] = useState<boolean[]>([]);
+
+  // Sync state with props when generatedTodos changes
+  useEffect(() => {
+    setEditedTodos([...generatedTodos]);
+    setSelections(generatedTodos.map(() => true));
+  }, [generatedTodos]);
 
 
   // Derive todos with selections

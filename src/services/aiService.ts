@@ -98,15 +98,11 @@ Response format example:
   }
 
   private parseAIResponse(response: string): AIGeneratedTodo[] {
-    console.log('AI Response:', response);
-
     try {
       // Try to extract JSON from markdown code blocks first
       const codeBlockMatch = response.match(/```(?:json)?\s*([\s\S]*?)```/);
-      console.log('Code block match:', codeBlockMatch);
 
       let jsonString = codeBlockMatch ? codeBlockMatch[1].trim() : response;
-      console.log('JSON string after extraction:', jsonString);
 
       // If no code block, try to find JSON array directly
       if (!codeBlockMatch) {
@@ -117,9 +113,7 @@ Response format example:
         jsonString = jsonMatch[0];
       }
 
-      console.log('Final JSON string to parse:', jsonString);
       const parsed = JSON.parse(jsonString);
-      console.log('Parsed JSON:', parsed);
 
       if (!Array.isArray(parsed)) {
         throw new Error('Response is not an array');
